@@ -6,8 +6,10 @@ import subprocess
 import uuid
 
 TOKEN = os.getenv("DISCORD_TOKEN")
+# PROXY_URL terminalden alınacak
+PROXY_URL = os.getenv("PROXY_URL")
+
 MUSIC_DIR = "music"
-COOKIES_FILE = "cookies.txt"
 YTDLP = "/usr/local/bin/yt-dlp"
 
 os.makedirs(MUSIC_DIR, exist_ok=True)
@@ -21,6 +23,12 @@ current_file = None
 @bot.event
 async def on_ready():
     print(f"Giriş yapıldı: {bot.user}")
+    if PROXY_URL:
+        # Güvenlik için şifreyi gizleyerek yazdıralım
+        safe_proxy = PROXY_URL.split("@")[-1] if "@" in PROXY_URL else "Ayarlı"
+        print(f"🌍 Proxy devrede: ...@{safe_proxy}")
+    else:
+        print(f"⚠️ Proxy YOK! Bu sunucu banlanabilir.")
 
 async def ses_kanalina_baglan(ctx):
     if ctx.voice_client:
@@ -31,27 +39,45 @@ async def ses_kanalina_baglan(ctx):
     return await ctx.author.voice.channel.connect()
 
 def youtube_download(url: str) -> str:
-    if not os.path.exists(COOKIES_FILE):
-        raise RuntimeError("cookies.txt bulunamadı")
-
     out_file = os.path.join(MUSIC_DIR, f"{uuid.uuid4()}.mp3")
 
+    # GÜNCELLENMİŞ KOMUT YAPISI
     cmd = [
         YTDLP,
-        "--js-runtimes", "node",
-        "--cookies", COOKIES_FILE,
-        "-f", "bestaudio",
-        "--extract-audio",
-        "--audio-format", "mp3",
         "--no-playlist",
+        "-f", "bestaudio/best",
+        "-x",
+        "--audio-format", "mp3",
+        "--force-ipv4",
+        "--no-check-certificate", # SSL hatalarını bazen proxy yüzünden verir, yok sayalım.
+        
+        # iOS yerine Android kullanıyoruz, PO Token istemez.
+        "--extractor-args", "youtube:player_client=android",
+        
         "-o", out_file,
         url
     ]
 
+    # Proxy varsa ekle
+    if PROXY_URL:
+        cmd.insert(1, "--proxy")
+        cmd.insert(2, PROXY_URL)
+
     result = subprocess.run(cmd, capture_output=True, text=True)
 
-    if result.returncode != 0 or not os.path.exists(out_file):
-        raise RuntimeError(result.stderr.strip() or "YouTube indirilemedi")
+    if result.returncode != 0:
+        print(f"⚠️ Hata Logu: {result.stderr}")
+        
+        if "Too Many Requests" in result.stderr or "429" in result.stderr:
+             raise RuntimeError("Bu Proxy IP'si YouTube tarafından geçici limitlendi (429). Lütfen farklı bir Proxy IP'si deneyin.")
+        
+        if "Sign in" in result.stderr:
+             raise RuntimeError("YouTube erişim reddetti. Proxy çalışmıyor olabilir.")
+        
+        raise RuntimeError(f"İndirme başarısız.")
+
+    if not os.path.exists(out_file):
+        raise RuntimeError("Dosya indirilemedi.")
 
     return out_file
 
@@ -70,30 +96,32 @@ async def kes(ctx):
     if ctx.voice_client:
         ctx.voice_client.stop()
     if current_file and os.path.exists(current_file):
-        os.remove(current_file)
+        try: os.remove(current_file)
+        except: pass
         current_file = None
 
 @bot.command(name="çal")
 async def cal(ctx, kaynak: str):
     global current_file
     vc = await ses_kanalina_baglan(ctx)
-    if not vc:
-        return
+    if not vc: return
 
     if vc.is_playing() or vc.is_paused():
         vc.stop()
         await asyncio.sleep(0.5)
 
     if current_file and os.path.exists(current_file):
-        os.remove(current_file)
+        try: os.remove(current_file)
+        except: pass
         current_file = None
 
     if kaynak.startswith("http"):
-        await ctx.send("⬇️ YouTube indiriliyor...")
+        await ctx.send("⬇️ Proxy ile indiriliyor...")
         try:
-            file_path = youtube_download(kaynak)
+            loop = asyncio.get_event_loop()
+            file_path = await loop.run_in_executor(None, youtube_download, kaynak)
         except Exception as e:
-            await ctx.send(f"❌ YouTube hatası:\n```{str(e)[:1500]}```")
+            await ctx.send(f"❌ Hata: {str(e)}")
             return
         current_file = file_path
         vc.play(discord.FFmpegPCMAudio(file_path))
@@ -109,6 +137,6 @@ async def cal(ctx, kaynak: str):
     await ctx.send(f"🎵 Çalıyor: {kaynak}")
 
 if not TOKEN:
-    raise RuntimeError("DISCORD_TOKEN ortam değişkeni bulunamadı!")
+    raise RuntimeError("DISCORD_TOKEN eksik!")
 
 bot.run(TOKEN)
