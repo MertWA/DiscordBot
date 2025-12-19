@@ -1,79 +1,80 @@
-# Discord Müzik Botu
+# Discord Müzik Botu (Proxy & Anti-Bot Destekli)
 
-Bu proje, Python ve `discord.py` kullanılarak geliştirilmiş; YouTube bağlantılarını indirip çalabilen veya sunucudaki yerel dosyaları oynatabilen bir Discord müzik botudur.
+Bu proje, Python ve `discord.py` kullanılarak geliştirilmiş; YouTube engellemelerini aşmak için **Proxy** ve **Android İstemci** modunu kullanan gelişmiş bir Discord müzik botudur. Ayrıca sunucudaki yerel dosyaları da oynatabilir.
 
 📂 **Repo:** [https://github.com/MertWA/DiscordBot](https://github.com/MertWA/DiscordBot)
 
 ## 🚀 Özellikler
 
-* **YouTube Entegrasyonu:** `yt-dlp` kullanarak YouTube bağlantılarındaki sesi indirir ve çalar.
+* **Gelişmiş YouTube Entegrasyonu:** `yt-dlp` ve Android istemci taklidi kullanarak bot korumalarını aşar.
+* **Proxy Desteği:** IP engellemelerini (429/Sign-in hataları) aşmak için HTTP/HTTPS proxy desteği sunar.
 * **Yerel Çalma:** `music/` klasörüne eklenen ses dosyalarını doğrudan oynatabilir.
-* **Çerez (Cookies) Desteği:** YouTube yaş kısıtlaması veya bot korumalarını aşmak için `cookies.txt` kullanır.
-* **Otomatik Temizlik:** Yeni bir şarkıya geçildiğinde veya müzik durdurulduğunda geçici indirilen dosyalar silinir.
+* **Otomatik Temizlik:** Müzik bittiğinde veya durdurulduğunda geçici dosyalar (UUID ile isimlendirilir) otomatik silinir.
+* **Cookies Gerektirmez:** Karmaşık çerez dosyalarıyla uğraşmanıza gerek kalmaz.
 
 ## 🛠️ Gereksinimler
 
-Botun sorunsuz çalışması için sunucunuzda aşağıdaki araçların yüklü olması gerekir:
+Botun sorunsuz çalışması için sunucunuzda şunlar yüklü olmalıdır:
 
 * **Python 3.8+**
-* **FFmpeg:** Ses işleme ve dönüştürme için gereklidir (Sistem PATH'ine eklenmiş olmalıdır).
-* **yt-dlp:** YouTube videolarını indirmek için gereklidir.
-* **Node.js:** `yt-dlp`'nin JavaScript çalışma zamanı (js-runtimes) argümanı için gereklidir.
+* **FFmpeg:** Ses işleme için gereklidir (Sistem PATH'ine eklenmiş olmalıdır).
+* **yt-dlp (Nightly):** YouTube'un son güncellemelerine karşı `yt-dlp`'nin en güncel geliştirici sürümü gereklidir.
+* **Proxy (Önerilen):** VPS/Datacenter IP'leri YouTube tarafından engellendiği için çalışan bir Residential (Ev Tipi) Proxy önerilir.
 
 ## 📦 Kurulum
 
-1.  Projeyi bilgisayarınıza indirin:
+1.  Projeyi indirin:
     ```bash
     git clone [https://github.com/MertWA/DiscordBot.git](https://github.com/MertWA/DiscordBot.git)
     cd DiscordBot
     ```
 
-2.  Gerekli Python kütüphanesini yükleyin:
+2.  Gerekli kütüphaneleri yükleyin:
     ```bash
     pip install discord.py
+    # yt-dlp'nin en güncel sürümünü yüklemek zorunludur:
+    pip install -U --pre "yt-dlp[default]"
     ```
 
 ## ⚙️ Yapılandırma
 
-Botu çalıştırmadan önce aşağıdaki adımları tamamlamanız gerekir:
+Botu çalıştırmadan önce ortam değişkenlerini (Environment Variables) ayarlamalısınız.
 
 ### 1. Discord Token
-Botun çalışabilmesi için `DISCORD_TOKEN` ortam değişkeni (environment variable) tanımlanmalıdır.
+Botun çalışabilmesi için `DISCORD_TOKEN` gereklidir.
 
-### 2. Cookies Dosyası
-Bot, YouTube indirmeleri için proje ana dizininde **`cookies.txt`** dosyasına ihtiyaç duyar.
-* Tarayıcınızdan YouTube çerezlerini "Netscape formatında" dışa aktarın.
-* Dosyayı `cookies.txt` adıyla `bot.py` ile aynı dizine kaydedin.
+### 2. Proxy Ayarı (Önemli)
+Sunucu IP'niz YouTube tarafından engelliyse (Sign in / 429 hatası), `PROXY_URL` tanımlamalısınız.
+**Format:** `http://kullaniciadi:sifre@ip_adresi:port`
 
 ### 3. yt-dlp Yolu
-Eğer `yt-dlp` sisteminizde farklı bir konumdaysa, kod içerisindeki `YTDLP` değişkenini kendi yolunuza göre güncelleyin. Varsayılan: `/usr/local/bin/yt-dlp`
+Kod varsayılan olarak `/usr/local/bin/yt-dlp` yolunu kullanır. Farklıysa `bot.py` içindeki `YTDLP` değişkenini güncelleyin.
 
 ## ▶️ Kullanım
 
-Botu başlatmak için terminalde şu komutu kullanın:
+Botu başlatmak için terminalde aşağıdaki komutları kullanın:
 
-**Linux/Mac:**
-```bash
-export DISCORD_TOKEN="TOKEN_BURAYA"
+### Linux / Mac
+
+```
+export DISCORD_TOKEN="DISCORD_TOKENINIZ_BURAYA"
+export PROXY_URL="http://kullanici:sifre@ip:port"  # Proxy yoksa bu satırı atlayın
+
+python bot.py
+```
+### Windows 
+
+```
+$env:DISCORD_TOKEN="DISCORD_TOKENINIZ_BURAYA"
+$env:PROXY_URL="http://kullanici:sifre@ip:port"
+
 python bot.py
 ```
 
-**Windows (Powershell):**
-```powershell
-$env:DISCORD_TOKEN="TOKEN_BURAYA"
-python bot.py
-```
+###💬 Komutlar
 
-### 💬 Komutlar
-
-| Komut | Açıklama |
-| :--- | :--- |
-| `!katıl` | Botu bulunduğunuz ses kanalına çağırır. |
-| `!çal <url>` | Belirtilen YouTube bağlantısını indirir ve çalar. |
-| `!çal <dosya>` | `music/` klasöründeki belirtilen dosyayı çalar (örn: `!çal sarki.mp3`). |
-| `!kes` | Çalan müziği durdurur ve indirilen geçici dosyayı siler. |
-| `!git` | Bot ses kanalından ayrılır. |
-
-## ⚠️ Notlar
-* Bot, indirilen YouTube dosyalarını MP3 formatına çevirerek `music/` klasörüne geçici bir isimle (UUID) kaydeder.
-* `!kes` komutu kullanıldığında veya yeni bir şarkı açıldığında eski dosya otomatik olarak silinir.
+!katıl	Botu bulunduğunuz ses kanalına çağırır.
+!çal <url>	Belirtilen YouTube bağlantısını indirir ve çalar.
+!çal <dosya>	music/ klasöründeki yerel dosyayı çalar (örn: !çal sarki.mp3).
+!kes	Çalan müziği durdurur ve indirilen geçici dosyayı siler.
+!git	Bot ses kanalından ayrılır.
