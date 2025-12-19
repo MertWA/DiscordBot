@@ -17,7 +17,7 @@ Botun sorunsuz çalışması için sunucunuzda aşağıdaki araçların yüklü 
 
 * **Python 3.8+**
 * **FFmpeg:** Ses işleme ve dönüştürme için gereklidir (Sistem PATH'ine eklenmiş olmalıdır).
-* **yt-dlp:** YouTube videolarını indirmek için gereklidir. (Kod varsayılan olarak `/usr/local/bin/yt-dlp` yolunu kullanır).
+* **yt-dlp:** YouTube videolarını indirmek için gereklidir.
 * **Node.js:** `yt-dlp`'nin JavaScript çalışma zamanı (js-runtimes) argümanı için gereklidir.
 
 ## 📦 Kurulum
@@ -41,31 +41,39 @@ Botu çalıştırmadan önce aşağıdaki adımları tamamlamanız gerekir:
 Botun çalışabilmesi için `DISCORD_TOKEN` ortam değişkeni (environment variable) tanımlanmalıdır.
 
 ### 2. Cookies Dosyası
-Bot, YouTube indirmeleri için proje ana dizininde **`cookies.txt`** dosyasına ihtiyaç duyar. Bu dosya olmadan indirme işlemi başlamaz.
+Bot, YouTube indirmeleri için proje ana dizininde **`cookies.txt`** dosyasına ihtiyaç duyar.
 * Tarayıcınızdan YouTube çerezlerini "Netscape formatında" dışa aktarın.
 * Dosyayı `cookies.txt` adıyla `bot.py` ile aynı dizine kaydedin.
 
 ### 3. yt-dlp Yolu
-Eğer `yt-dlp` sisteminizde farklı bir konumdaysa, kod içerisindeki şu satırı kendi yolunuza göre güncelleyin:
-```python
-YTDLP = "/usr/local/bin/yt-dlp" # Buraya kendi yt-dlp yolunuzu yazın
+Eğer `yt-dlp` sisteminizde farklı bir konumdaysa, kod içerisindeki `YTDLP` değişkenini kendi yolunuza göre güncelleyin. Varsayılan: `/usr/local/bin/yt-dlp`
 
-▶️ Kullanım
+## ▶️ Kullanım
+
 Botu başlatmak için terminalde şu komutu kullanın:
 
-# Linux/Mac
+**Linux/Mac:**
+```bash
 export DISCORD_TOKEN="TOKEN_BURAYA"
 python bot.py
+```
 
-# Windows (Powershell)
+**Windows (Powershell):**
+```powershell
 $env:DISCORD_TOKEN="TOKEN_BURAYA"
 python bot.py
+```
 
-💬 Komutlar
+### 💬 Komutlar
 
-Komut,Açıklama
-!katıl,Botu bulunduğunuz ses kanalına çağırır.
-!çal <url>,Belirtilen YouTube bağlantısını indirir ve çalar.
-!çal <dosya>,music/ klasöründeki belirtilen dosyayı çalar (örn: !çal sarki.mp3).
-!kes,Çalan müziği durdurur ve indirilen geçici dosyayı siler.
-!git,Bot ses kanalından ayrılır.
+| Komut | Açıklama |
+| :--- | :--- |
+| `!katıl` | Botu bulunduğunuz ses kanalına çağırır. |
+| `!çal <url>` | Belirtilen YouTube bağlantısını indirir ve çalar. |
+| `!çal <dosya>` | `music/` klasöründeki belirtilen dosyayı çalar (örn: `!çal sarki.mp3`). |
+| `!kes` | Çalan müziği durdurur ve indirilen geçici dosyayı siler. |
+| `!git` | Bot ses kanalından ayrılır. |
+
+## ⚠️ Notlar
+* Bot, indirilen YouTube dosyalarını MP3 formatına çevirerek `music/` klasörüne geçici bir isimle (UUID) kaydeder.
+* `!kes` komutu kullanıldığında veya yeni bir şarkı açıldığında eski dosya otomatik olarak silinir.
