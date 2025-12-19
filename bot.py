@@ -6,9 +6,7 @@ import subprocess
 import uuid
 
 TOKEN = os.getenv("DISCORD_TOKEN")
-# PROXY_URL terminalden alınacak
 PROXY_URL = os.getenv("PROXY_URL")
-
 MUSIC_DIR = "music"
 YTDLP = "/usr/local/bin/yt-dlp"
 
@@ -24,11 +22,8 @@ current_file = None
 async def on_ready():
     print(f"Giriş yapıldı: {bot.user}")
     if PROXY_URL:
-        # Güvenlik için şifreyi gizleyerek yazdıralım
         safe_proxy = PROXY_URL.split("@")[-1] if "@" in PROXY_URL else "Ayarlı"
-        print(f"🌍 Proxy devrede: ...@{safe_proxy}")
-    else:
-        print(f"⚠️ Proxy YOK! Bu sunucu banlanabilir.")
+        print(f"Proxy devrede: ...@{safe_proxy}")
 
 async def ses_kanalina_baglan(ctx):
     if ctx.voice_client:
@@ -41,7 +36,6 @@ async def ses_kanalina_baglan(ctx):
 def youtube_download(url: str) -> str:
     out_file = os.path.join(MUSIC_DIR, f"{uuid.uuid4()}.mp3")
 
-    # GÜNCELLENMİŞ KOMUT YAPISI
     cmd = [
         YTDLP,
         "--no-playlist",
@@ -49,16 +43,12 @@ def youtube_download(url: str) -> str:
         "-x",
         "--audio-format", "mp3",
         "--force-ipv4",
-        "--no-check-certificate", # SSL hatalarını bazen proxy yüzünden verir, yok sayalım.
-        
-        # iOS yerine Android kullanıyoruz, PO Token istemez.
+        "--no-check-certificate",
         "--extractor-args", "youtube:player_client=android",
-        
         "-o", out_file,
         url
     ]
 
-    # Proxy varsa ekle
     if PROXY_URL:
         cmd.insert(1, "--proxy")
         cmd.insert(2, PROXY_URL)
@@ -66,18 +56,11 @@ def youtube_download(url: str) -> str:
     result = subprocess.run(cmd, capture_output=True, text=True)
 
     if result.returncode != 0:
-        print(f"⚠️ Hata Logu: {result.stderr}")
-        
-        if "Too Many Requests" in result.stderr or "429" in result.stderr:
-             raise RuntimeError("Bu Proxy IP'si YouTube tarafından geçici limitlendi (429). Lütfen farklı bir Proxy IP'si deneyin.")
-        
-        if "Sign in" in result.stderr:
-             raise RuntimeError("YouTube erişim reddetti. Proxy çalışmıyor olabilir.")
-        
-        raise RuntimeError(f"İndirme başarısız.")
+        print(f"Hata Logu: {result.stderr}")
+        raise RuntimeError("İndirme başarısız")
 
     if not os.path.exists(out_file):
-        raise RuntimeError("Dosya indirilemedi.")
+        raise RuntimeError("Dosya indirilemedi")
 
     return out_file
 
@@ -115,26 +98,27 @@ async def cal(ctx, kaynak: str):
         except: pass
         current_file = None
 
-    if kaynak.startswith("http"):
-        await ctx.send("⬇️ Proxy ile indiriliyor...")
-        try:
-            loop = asyncio.get_event_loop()
-            file_path = await loop.run_in_executor(None, youtube_download, kaynak)
-        except Exception as e:
-            await ctx.send(f"❌ Hata: {str(e)}")
-            return
-        current_file = file_path
-        vc.play(discord.FFmpegPCMAudio(file_path))
+    yerel_dosya = os.path.join(MUSIC_DIR, kaynak)
+    if os.path.exists(yerel_dosya):
+        current_file = yerel_dosya
+        vc.play(discord.FFmpegPCMAudio(yerel_dosya))
+        await ctx.send(f"🎵 Çalıyor: {kaynak}")
         return
 
-    dosya = os.path.join(MUSIC_DIR, kaynak)
-    if not os.path.exists(dosya):
-        await ctx.send("❌ Dosya bulunamadı.")
-        return
+    url = kaynak
+    if not kaynak.startswith("http"):
+        url = f"https://www.youtube.com/watch?v={kaynak}"
 
-    current_file = dosya
-    vc.play(discord.FFmpegPCMAudio(dosya))
-    await ctx.send(f"🎵 Çalıyor: {kaynak}")
+    await ctx.send("🎵 Müzik hazırlanıyor...")
+    try:
+        loop = asyncio.get_event_loop()
+        file_path = await loop.run_in_executor(None, youtube_download, url)
+    except Exception:
+        await ctx.send("❌ Müzik açılamadı.")
+        return
+        
+    current_file = file_path
+    vc.play(discord.FFmpegPCMAudio(file_path))
 
 if not TOKEN:
     raise RuntimeError("DISCORD_TOKEN eksik!")
