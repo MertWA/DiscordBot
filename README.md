@@ -1,128 +1,71 @@
-# 🎵 Discord Music Bot (yt-dlp)
+# Discord Müzik Botu
 
-![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python)
-![Discord.py](https://img.shields.io/badge/Discord.py-2.0%2B-5865F2?style=for-the-badge&logo=discord)
-![FFmpeg](https://img.shields.io/badge/FFmpeg-Required-green?style=for-the-badge&logo=ffmpeg)
+Bu proje, Python ve `discord.py` kullanılarak geliştirilmiş; YouTube bağlantılarını indirip çalabilen veya sunucudaki yerel dosyaları oynatabilen bir Discord müzik botudur.
 
-A lightweight, self-hosted Discord music bot capable of playing audio directly from YouTube links using `yt-dlp` and `ffmpeg`.  
-It supports cookie-based authentication to bypass YouTube restrictions.
+📂 **Repo:** [https://github.com/MertWA/DiscordBot](https://github.com/MertWA/DiscordBot)
 
-> **Note:** This project includes setups for both English and Turkish speakers.  
-> 🇹🇷 **Türkçe dokümantasyon için [aşağı kaydırın](#-discord-müzik-botu-türkçe).**
+## 🚀 Özellikler
 
----
+* **YouTube Entegrasyonu:** `yt-dlp` kullanarak YouTube bağlantılarındaki sesi indirir ve çalar.
+* **Yerel Çalma:** `music/` klasörüne eklenen ses dosyalarını doğrudan oynatabilir.
+* **Çerez (Cookies) Desteği:** YouTube yaş kısıtlaması veya bot korumalarını aşmak için `cookies.txt` kullanır.
+* **Otomatik Temizlik:** Yeni bir şarkıya geçildiğinde veya müzik durdurulduğunda geçici indirilen dosyalar silinir.
 
-## 🇺🇸 Features
+## 🛠️ Gereksinimler
 
-- **YouTube Playback:** Downloads and streams audio from YouTube URLs  
-- **Local File Support:** Plays files located in the `music/` directory  
-- **Cookie Support:** Uses `cookies.txt` to handle age-restricted or premium content  
-- **Clean Management:** Auto-deletes temporary files after playback or when skipped  
+Botun sorunsuz çalışması için sunucunuzda aşağıdaki araçların yüklü olması gerekir:
 
----
+* **Python 3.8+**
+* **FFmpeg:** Ses işleme ve dönüştürme için gereklidir (Sistem PATH'ine eklenmiş olmalıdır).
+* **yt-dlp:** YouTube videolarını indirmek için gereklidir. (Kod varsayılan olarak `/usr/local/bin/yt-dlp` yolunu kullanır).
+* **Node.js:** `yt-dlp`'nin JavaScript çalışma zamanı (js-runtimes) argümanı için gereklidir.
 
-## 🛠️ Installation & Setup
+## 📦 Kurulum
 
-### 1. Prerequisites
+1.  Projeyi bilgisayarınıza indirin:
+    ```bash
+    git clone [https://github.com/MertWA/DiscordBot.git](https://github.com/MertWA/DiscordBot.git)
+    cd DiscordBot
+    ```
 
-Ensure you have the following installed:
+2.  Gerekli Python kütüphanesini yükleyin:
+    ```bash
+    pip install discord.py
+    ```
 
-- Python **3.8+**
-- **FFmpeg** (must be added to system PATH)
-- **yt-dlp** (binary executable)
+## ⚙️ Yapılandırma
 
-### 2. Clone the Repository
+Botu çalıştırmadan önce aşağıdaki adımları tamamlamanız gerekir:
 
-```bash
-git clone https://github.com/USERNAME/REPOSITORY.git
-cd REPOSITORY
-3. Install Dependencies
-bash
-Kodu kopyala
-pip install -r requirements.txt
-4. Configuration
-Bot Token (Environment Variable):
+### 1. Discord Token
+Botun çalışabilmesi için `DISCORD_TOKEN` ortam değişkeni (environment variable) tanımlanmalıdır.
 
-bash
-Kodu kopyala
-export DISCORD_TOKEN="YOUR_DISCORD_BOT_TOKEN"
-Cookies:
+### 2. Cookies Dosyası
+Bot, YouTube indirmeleri için proje ana dizininde **`cookies.txt`** dosyasına ihtiyaç duyar. Bu dosya olmadan indirme işlemi başlamaz.
+* Tarayıcınızdan YouTube çerezlerini "Netscape formatında" dışa aktarın.
+* Dosyayı `cookies.txt` adıyla `bot.py` ile aynı dizine kaydedin.
 
-Place your cookies.txt (Netscape format) in the root directory
+### 3. yt-dlp Yolu
+Eğer `yt-dlp` sisteminizde farklı bir konumdaysa, kod içerisindeki şu satırı kendi yolunuza göre güncelleyin:
+```python
+YTDLP = "/usr/local/bin/yt-dlp" # Buraya kendi yt-dlp yolunuzu yazın
 
-Required for age-restricted or premium content
+▶️ Kullanım
+Botu başlatmak için terminalde şu komutu kullanın:
 
-yt-dlp Path:
-
-Default path: /usr/local/bin/yt-dlp
-
-Update bot.py if different
-
-🚀 Usage
-Run the bot:
-
-bash
-Kodu kopyala
-python3 bot.py
-Commands (Turkish-based)
-!katıl → Summons the bot to your voice channel
-
-!çal <url> → Plays audio from a YouTube link
-
-!kes → Stops playback and clears queue
-
-!git → Disconnects the bot
-
-🇹🇷 Discord Müzik Botu (Türkçe)
-yt-dlp ve ffmpeg altyapısını kullanarak YouTube üzerinden yüksek kaliteli müzik çalan, kendi sunucunuzda barındırabileceğiniz basit ve güçlü bir Discord botu.
-
-✨ Özellikler
-YouTube Oynatma: Linkleri indirip anında oynatır
-
-Çerez Desteği: cookies.txt sayesinde yaş kısıtlamalarını aşar
-
-Otomatik Temizlik: Şarkı bitince geçici dosyaları siler
-
-🛠️ Kurulum
-1. Gereksinimler
-Python 3.8+
-
-FFmpeg (PATH’e ekli olmalı)
-
-yt-dlp (/usr/local/bin altında veya yol düzenlenmeli)
-
-2. Kütüphanelerin Yüklenmesi
-bash
-Kodu kopyala
-pip install -r requirements.txt
-3. Ayarlamalar
-Bot Token:
-
-bash
-Kodu kopyala
+# Linux/Mac
 export DISCORD_TOKEN="TOKEN_BURAYA"
-Cookies:
+python bot.py
 
-YouTube cookies içeren cookies.txt dosyasını ana dizine ekleyin
+# Windows (Powershell)
+$env:DISCORD_TOKEN="TOKEN_BURAYA"
+python bot.py
 
-Olmazsa indirme işlemi hata verir
+💬 Komutlar
 
-🚀 Kullanım
-bash
-Kodu kopyala
-python3 bot.py
-Komutlar
-!katıl → Botu ses kanalına çağırır
-
-!çal <link> → YouTube linkini indirir ve çalar
-
-!kes → Müziği durdurur ve dosyayı siler
-
-!git → Bot kanaldan ayrılır
-
-⚠️ Disclaimer / Yasal Uyarı
-This bot is for educational purposes only.
-Downloading copyrighted content may violate YouTube Terms of Service.
-
-Bu bot yalnızca eğitim amaçlıdır.
-YouTube’dan telifli içerik indirmek Hizmet Koşulları’na aykırı olabilir.
+Komut,Açıklama
+!katıl,Botu bulunduğunuz ses kanalına çağırır.
+!çal <url>,Belirtilen YouTube bağlantısını indirir ve çalar.
+!çal <dosya>,music/ klasöründeki belirtilen dosyayı çalar (örn: !çal sarki.mp3).
+!kes,Çalan müziği durdurur ve indirilen geçici dosyayı siler.
+!git,Bot ses kanalından ayrılır.
