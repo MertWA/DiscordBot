@@ -71,10 +71,33 @@ $env:PROXY_URL="http://kullanici:sifre@ip:port"
 python bot.py
 ```
 
-###💬 Komutlar
+## 💬 Komutlar
 
-!katıl	Botu bulunduğunuz ses kanalına çağırır.
-!çal <url>	Belirtilen YouTube bağlantısını indirir ve çalar.
-!çal <dosya>	music/ klasöründeki yerel dosyayı çalar (örn: !çal sarki.mp3).
-!kes	Çalan müziği durdurur ve indirilen geçici dosyayı siler.
-!git	Bot ses kanalından ayrılır.
+Botun desteklediği komutlar ve açıklamaları aşağıdadır:
+
+| Komut | Kullanım Şekli | Açıklama |
+| :--- | :--- | :--- |
+| **Katıl** | `!katıl` | Botu bulunduğunuz ses kanalına çağırır. |
+| **Çal (URL)** | `!çal <youtube_linki>` | Belirtilen YouTube bağlantısını Proxy üzerinden indirir ve çalar. |
+| **Çal (Yerel)**| `!çal <dosya_adi.mp3>` | `music/` klasörüne attığınız yerel dosyayı çalar. |
+| **Kes** | `!kes` | Çalan müziği anında durdurur ve geçici dosyayı siler. |
+| **Git** | `!git` | Bot ses kanalından ayrılarak çıkış yapar. |
+
+## ⚠️ Sorun Giderme
+
+Botu kullanırken karşılaşabileceğiniz yaygın hatalar ve çözümleri:
+
+### 🔴 429 Too Many Requests / HTTP Error 429
+* **Sebep:** Kullandığınız Proxy IP adresi YouTube tarafından çok fazla istek gönderdiği için geçici olarak engellenmiştir.
+* **Çözüm:** Webshare panelinizden farklı bir Proxy IP adresi seçerek `PROXY_URL` değişkenini güncelleyin.
+
+### 🔴 Sign in to confirm / Login required
+* **Sebep:** YouTube, trafiğin bir sunucudan veya bottan geldiğini algılamıştır.
+* **Çözüm:** "Datacenter Proxy" yerine "Residential (Ev Tipi) Proxy" kullanmayı deneyin. Kodun **Android Modu** çalıştığından emin olun.
+
+### 🔴 Dosya İndirilemedi / Format Hataları
+* **Sebep:** `yt-dlp` kütüphanesi güncelliğini yitirmiş olabilir.
+* **Çözüm:** Sunucuda şu komutu çalıştırarak güncelleyin:
+    ```bash
+    pip install -U --pre "yt-dlp[default]"
+    ```
