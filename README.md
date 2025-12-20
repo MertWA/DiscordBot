@@ -28,7 +28,7 @@ Botun sorunsuz çalışması için sunucunuzda (VPS/VDS) şunlar yüklü olmalı
 
 1.  **Projeyi indirin:**
 ```bash
-git clone [https://github.com/MertWA/DiscordBot.git](https://github.com/MertWA/DiscordBot.git)
+git clone https://github.com/MertWA/DiscordBot.git
 cd DiscordBot
 ```
 
